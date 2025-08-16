@@ -79,7 +79,7 @@ public class BoardColumnDAO {
             return dtos;
         }
     }
-
+     
         public Optional<BoardColunmEntity> findById(final Long boardId) throws SQLException{
         var sql = "SELECT bc.name, bc.kind, c.id, c.title, c.description FROM BOARDS_COLUMNS bc INNER JOIN CARDS c ON c.board_colum_id = bc.id WHERE bc.id = ?";
         try(var statement = connection.prepareStatement(sql)){

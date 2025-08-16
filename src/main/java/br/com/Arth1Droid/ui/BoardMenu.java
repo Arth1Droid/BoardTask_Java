@@ -1,10 +1,14 @@
 package br.com.Arth1Droid.ui;
 
+import static br.com.Arth1Droid.persistence.config.ConnectionConfig.getConnection;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import br.com.Arth1Droid.persistence.entity.BoardColunmEntity;
 import br.com.Arth1Droid.persistence.entity.BoardEntity;
+import br.com.Arth1Droid.service.BoardColumnQueryService;
 import br.com.Arth1Droid.service.BoardQueryService;
 import lombok.AllArgsConstructor;
 
@@ -52,27 +56,27 @@ public class BoardMenu {
         }
 
 
-    private Object createCard() {
+    private void createCard() {
   
     }
 
 
-    private Object moveCardToNextColumn() {
+    private void moveCardToNextColumn() {
 
     }
 
 
-    private Object blockCard() {
+    private void blockCard() {
    
     }
 
 
-    private Object unblockCard() {
+    private void unblockCard() {
      
     }
 
 
-    private Object cancelCard() {
+    private void cancelCard() {
        
     }
 
@@ -90,13 +94,26 @@ public class BoardMenu {
         }
 
 
-    private Object showColumn() {
- 
+    private void showColumn() throws SQLException {
+        System.out.printf("Escolha uma coluna do Board %s\n", entity.getName());
+        var columnsIds = entity.getBoardColunm().stream().map(BoardColunmEntity::getId).toList();
+        var selectedColumn = -1L; 
+        while(!columnsIds.contains(selectedColumn)){
+            entity.getBoardColunm().forEach(c -> System.out.printf("%s - %s\n", c.getId(), c.getName(), c.getKind()));
+            selectedColumn = scanner.nextLong();
+        }
+        try(var connection = getConnection()){
+          var column =  new BoardColumnQueryService(connection).findById(selectedColumn);
+          column.ifPresent(co -> {
+            System.out.printf("Coluna %s tip o%s\n", co.getName(), co.getKind());
+            co.getCards().forEach(ca -> System.out.printf("Card %s - %s\nDescrição: %s", ca.getId(), ca.getTitle(), ca.getDescription()));
+          });
+        }
     }
 
 
-    private Object showCard() {
-    
+    private void showCard() {
+        
     }
 }
 
