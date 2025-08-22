@@ -10,6 +10,7 @@ import br.com.Arth1Droid.persistence.entity.BoardColunmEntity;
 import br.com.Arth1Droid.persistence.entity.BoardEntity;
 import br.com.Arth1Droid.service.BoardColumnQueryService;
 import br.com.Arth1Droid.service.BoardQueryService;
+import br.com.Arth1Droid.service.CardQueryService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -112,8 +113,20 @@ public class BoardMenu {
     }
 
 
-    private void showCard() {
+    private void showCard() throws SQLException {
+        System.out.println("Informe o Id do card que deseja visualizar: ");
+        var selectedCardId = scanner.nextLong();
+        try(var connection = getConnection()){
+            new CardQueryService(connection).findById(selectedCardId).ifPresentOrElse(c ->{
+                System.out.printf("Card %s - %s\n", c.id(), c.title());
+                System.out.printf("Descrição %s\n", c.description());
+                System.out.println(c.blocked() ? "O card está bloqueado Motivo %s" + c.blockedReason() : " Nâo está bloqueado");
+                System.out.printf("Já foi bloqueado %s vezes %s\n", c.blocksAmount());
+                System.out.printf("Localizado na coluna %s - %s\n", c.columnId(), c.columnName());
         
+        },
+        () -> System.out.printf("Não existe card com o id %s\n ", selectedCardId)); 
+        }
     }
 }
 
