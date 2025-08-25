@@ -1,6 +1,7 @@
 package br.com.Arth1Droid.ui;
 
 import static br.com.Arth1Droid.persistence.config.ConnectionConfig.getConnection;
+import static br.com.Arth1Droid.persistence.entity.BoardColunmKindEnum.INITIAL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,9 +9,11 @@ import java.util.Scanner;
 
 import br.com.Arth1Droid.persistence.entity.BoardColunmEntity;
 import br.com.Arth1Droid.persistence.entity.BoardEntity;
+import br.com.Arth1Droid.persistence.entity.CardEntity;
 import br.com.Arth1Droid.service.BoardColumnQueryService;
 import br.com.Arth1Droid.service.BoardQueryService;
 import br.com.Arth1Droid.service.CardQueryService;
+import br.com.Arth1Droid.service.CardService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -21,7 +24,7 @@ public class BoardMenu {
 
     public void execute() {
         try{
-        System.out.printf("Bem vindo ao board %s, selecione a operação desejada: ", entity.getId());
+        System.out.printf("Bem vindo ao board %s, selecione a operação desejada:\n ", entity.getId());
         var option = -1;
         while(option != 9){
             System.out.println("1 - Criar um novo Card");
@@ -57,8 +60,16 @@ public class BoardMenu {
         }
 
 
-    private void createCard() {
-  
+    private void createCard() throws SQLException {
+        var card = new CardEntity();
+        System.out.println("Informe o título do card: ");
+        card.setTitle(scanner.next());
+        System.out.println("Informe a descrição do card: ");
+        card.setDescription(scanner.next());
+        card.setBoardColumn(entity.getInitialColumn());
+        try(var connection = getConnection()){
+            new CardService(connection).insert(card);
+        }
     }
 
 
@@ -97,17 +108,17 @@ public class BoardMenu {
 
     private void showColumn() throws SQLException {
         System.out.printf("Escolha uma coluna do Board %s\n", entity.getName());
-        var columnsIds = entity.getBoardColunm().stream().map(BoardColunmEntity::getId).toList();
+        var columnsIds = entity.getBoardColunms().stream().map(BoardColunmEntity::getId).toList();
         var selectedColumn = -1L; 
         while(!columnsIds.contains(selectedColumn)){
-            entity.getBoardColunm().forEach(c -> System.out.printf("%s - %s\n", c.getId(), c.getName(), c.getKind()));
+            entity.getBoardColunms().forEach(c -> System.out.printf("%s - %s\n", c.getId(), c.getName(), c.getKind()));
             selectedColumn = scanner.nextLong();
         }
         try(var connection = getConnection()){
           var column =  new BoardColumnQueryService(connection).findById(selectedColumn);
           column.ifPresent(co -> {
             System.out.printf("Coluna %s tip o%s\n", co.getName(), co.getKind());
-            co.getCards().forEach(ca -> System.out.printf("Card %s - %s\nDescrição: %s", ca.getId(), ca.getTitle(), ca.getDescription()));
+            co.getCards().forEach(ca -> System.out.printf("Card %s - %s\nDescrição: %s\n", ca.getId(), ca.getTitle(), ca.getDescription()));
           });
         }
     }
