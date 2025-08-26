@@ -75,7 +75,7 @@ public class BoardMenu {
 
 
     private void moveCardToNextColumn() throws SQLException {
-        System.out.println("Inforeme ocard que deseja mover para a próxima coluna: ");
+        System.out.println("Inforeme o card que deseja mover para a próxima coluna: ");
         var cardId = scanner.nextLong();
         try(var connection = getConnection()){
             var boardColumnsInfo = entity.getBoardColunms().stream()
@@ -89,7 +89,7 @@ public class BoardMenu {
 
 
     private void blockCard() {
-   
+
     }
 
 
@@ -98,16 +98,25 @@ public class BoardMenu {
     }
 
 
-    private void cancelCard() {
-       
+    private void cancelCard() throws SQLException {
+        System.out.println("Informe o card que deseja mover para a coluna de cancelamento: ");
+        var cardId = scanner.nextLong();
+        var cancelColumn = entity.getCancelColumn();
+        var boardColumnsInfo = entity.getBoardColunms().stream()
+            .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getKind())).toList();
+        try(var connection = getConnection()){
+            new CardService(connection).cancel(cardId, cancelColumn.getId(), boardColumnsInfo);
+        } catch( RuntimeException ex){
+            System.out.println(ex.getMessage());
+        }
     }
 
 
     private void showBoard() throws SQLException {
         try(Connection connection = getConnection()){
             var optional = new BoardQueryService(connection).showBoardDetails(entity.getId());
-            optional.ifPresent(b ->{
-                System.out.printf("Board {%s}\n", b.id(), b.name());
+            optional.ifPresent(b -> {
+                System.out.printf("Board {%s, %s}\n", b.id(), b.name());
                 b.columns().forEach(c -> 
                     System.out.printf("Coluna [%s] tipo: [%s] tem %s\n" c.name(), c.kind(), c.cardsAmount())
                     );
