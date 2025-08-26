@@ -88,12 +88,22 @@ public class BoardMenu {
     }
 
 
-    private void blockCard() {
-
+    private void blockCard() throws SQLException {
+        System.out.println("Informe o id do card que será bloqueado: ");
+        var cardId = scanner.nextLong();
+        System.out.println("Informe o motivo do bloqueio: ");
+        var reason = scanner.next();
+        var boardColumnsInfo = entity.getBoardColunms().stream()
+            .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getKind())).toList();
+        try(var connection = getConnection()){
+            new CardService(connection).block(cardId, reason,boardColumnsInfo);
+        }catch( RuntimeException ex){
+            System.out.println(ex.getMessage());
+        }
     }
 
 
-    private void unblockCard() {
+    private void unblockCard() throws SQLException {
      
     }
 
@@ -118,7 +128,7 @@ public class BoardMenu {
             optional.ifPresent(b -> {
                 System.out.printf("Board {%s, %s}\n", b.id(), b.name());
                 b.columns().forEach(c -> 
-                    System.out.printf("Coluna [%s] tipo: [%s] tem %s\n" c.name(), c.kind(), c.cardsAmount())
+                    System.out.printf("Coluna [%s] tipo: [%s] tem %s\n", c.name(), c.kind(), c.cardsAmount())
                     );
                 });
             };
