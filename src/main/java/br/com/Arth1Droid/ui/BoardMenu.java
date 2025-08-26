@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import br.com.Arth1Droid.dto.BoardColumnInfoDTO;
 import br.com.Arth1Droid.persistence.entity.BoardColunmEntity;
 import br.com.Arth1Droid.persistence.entity.BoardEntity;
 import br.com.Arth1Droid.persistence.entity.CardEntity;
@@ -73,7 +74,16 @@ public class BoardMenu {
     }
 
 
-    private void moveCardToNextColumn() {
+    private void moveCardToNextColumn() throws SQLException {
+        System.out.println("Inforeme ocard que deseja mover para a próxima coluna: ");
+        var cardId = scanner.nextLong();
+        try(var connection = getConnection()){
+            var boardColumnsInfo = entity.getBoardColunms().stream()
+            .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getKind())).toList();
+            new CardService(connection).moveToNextColumn(cardId, boardColumnsInfo);
+        } catch( RuntimeException ex){
+            System.out.println(ex.getMessage());
+        }
 
     }
 

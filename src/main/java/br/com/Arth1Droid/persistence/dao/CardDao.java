@@ -34,6 +34,19 @@ public class CardDao {
         return entity;
     }
 
+    public void moveToColumn(final Long columnId , final Long cardId) throws SQLException{
+        var sql = "UPDATE CARDS SET board_column_id  = ? WHERE id = ?";
+        try(var statement = connection.prepareStatement(sql)){
+            var i = 1;
+            statement.setLong(i ++, columnId);
+            statement.setLong(i, cardId);
+            statement.executeUpdate();
+
+
+        }
+
+    }
+
     public Optional <CardDetails> findById(final Long id) throws SQLException{
         var sql = "SELECT c.id, c.title, c.description,b.blockedAt, b.block_reason, c.board_column_id, bc.name, (SELECT COUNT(sub_b.id) FROM BLOCKS sub_b WHERE sub_b.card_id = c.id) blocks_amount FROM CARDS c LEFT JOIN BLOCKS b ON c.id = b.card_id AND b.unblocked_at IS NULL INNER JOIN BOARD_COLUMNS bc ON bc.id = c.board_column_id WHERE c.id = ?;";
         try (var statement = connection.prepareStatement(sql)){
