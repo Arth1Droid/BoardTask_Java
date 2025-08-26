@@ -102,7 +102,6 @@ public class BoardMenu {
         }
     }
 
-
     private void unblockCard() throws SQLException {
         System.out.println("Informe o id do card que será desbloqueado: ");
         var cardId = scanner.nextLong();
